@@ -6,6 +6,7 @@ A collection of C++ programs I am using while learning data structures and algor
 
 - Binary Tree
 - Binary Search Tree
+- AVL Tree
 
 ## Folder Structure
 
@@ -15,8 +16,11 @@ Binary_Tree/
 
 BST/
 └── bst.cpp
+
+AVL/
+└── avl_tree.cpp
 ```
 
-The programs cover common operations such as tree creation, traversals, searching, height calculation, insertion, and deletion.
+The programs cover common operations such as tree creation, traversals, searching, height calculation, insertion, and deletion. The AVL tree also rebalances itself after insertions and deletions.
 
 I’ll keep adding more DSA implementations here as I work through the topics.
