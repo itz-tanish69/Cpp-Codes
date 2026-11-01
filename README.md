@@ -11,14 +11,13 @@ A collection of C++ programs I am using while learning data structures and algor
 ## Folder Structure
 
 ```
-Binary_Tree/
-└── binary_tree.cpp
-
-BST/
-└── bst.cpp
-
-AVL/
-└── avl_tree.cpp
+DSA/
+├── AVL/
+│   └── avl_tree.cpp
+├── Binary_Tree/
+│   └── binary_tree.cpp
+└── BST/
+    └── bst.cpp
 ```
 
 The programs cover common operations such as tree creation, traversals, searching, height calculation, insertion, and deletion. The AVL tree also rebalances itself after insertions and deletions.
