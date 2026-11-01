@@ -13,34 +13,30 @@ struct Node {
     }
 };
 
-Node* insert(Node* root, int data) {
+Node* insert(Node* root, int value) {
     if (root == NULL) {
-        return new Node(data);
+        return new Node(value);
     }
 
-    if (data < root->data) {
-        root->left = insert(root->left, data);
-    } else if (data > root->data) {
-        root->right = insert(root->right, data);
-    }
+    if (value < root->data) {
+        root->left = insert(root->left, value);
+    } else if (value > root->data) {
+        root->right = insert(root->right, value);
+    } // Duplicate values are ignored.
 
     return root;
 }
 
 bool search(Node* root, int key) {
-    if (root == NULL) {
-        return false;
+    while (root != NULL) {
+        if (root->data == key) {
+            return true;
+        }
+
+        root = key < root->data ? root->left : root->right;
     }
 
-    if (root->data == key) {
-        return true;
-    }
-
-    if (key < root->data) {
-        return search(root->left, key);
-    }
-
-    return search(root->right, key);
+    return false;
 }
 
 Node* findMin(Node* root) {
@@ -61,7 +57,7 @@ Node* findMax(Node* root) {
 
 Node* deleteNode(Node* root, int key) {
     if (root == NULL) {
-        return root;
+        return NULL;
     }
 
     if (key < root->data) {
@@ -70,20 +66,20 @@ Node* deleteNode(Node* root, int key) {
         root->right = deleteNode(root->right, key);
     } else {
         if (root->left == NULL) {
-            Node* temp = root->right;
+            Node* child = root->right;
             delete root;
-            return temp;
+            return child;
         }
 
         if (root->right == NULL) {
-            Node* temp = root->left;
+            Node* child = root->left;
             delete root;
-            return temp;
+            return child;
         }
 
-        Node* temp = findMin(root->right);
-        root->data = temp->data;
-        root->right = deleteNode(root->right, temp->data);
+        Node* successor = findMin(root->right);
+        root->data = successor->data;
+        root->right = deleteNode(root->right, successor->data);
     }
 
     return root;
@@ -130,16 +126,10 @@ void levelOrder(Node* root) {
     while (!q.empty()) {
         Node* current = q.front();
         q.pop();
-
         cout << current->data << " ";
 
-        if (current->left != NULL) {
-            q.push(current->left);
-        }
-
-        if (current->right != NULL) {
-            q.push(current->right);
-        }
+        if (current->left != NULL) q.push(current->left);
+        if (current->right != NULL) q.push(current->right);
     }
 }
 
@@ -151,68 +141,90 @@ int height(Node* root) {
     return 1 + max(height(root->left), height(root->right));
 }
 
+int countNodes(Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    return 1 + countNodes(root->left) + countNodes(root->right);
+}
+
+int countLeafNodes(Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    if (root->left == NULL && root->right == NULL) {
+        return 1;
+    }
+
+    return countLeafNodes(root->left) + countLeafNodes(root->right);
+}
+
+void printTraversals(Node* root) {
+    cout << "Inorder: ";
+    inorder(root);
+    cout << "\nPreorder: ";
+    preorder(root);
+    cout << "\nPostorder: ";
+    postorder(root);
+    cout << "\nLevel Order: ";
+    levelOrder(root);
+    cout << "\n";
+}
+
+void printStats(Node* root) {
+    cout << "Height: " << height(root) << "\n";
+    cout << "Total Nodes: " << countNodes(root) << "\n";
+    cout << "Leaf Nodes: " << countLeafNodes(root) << "\n";
+
+    Node* minimum = findMin(root);
+    Node* maximum = findMax(root);
+    if (minimum != NULL) cout << "Minimum: " << minimum->data << "\n";
+    if (maximum != NULL) cout << "Maximum: " << maximum->data << "\n";
+}
+
+void deleteTree(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+
+    deleteTree(root->left);
+    deleteTree(root->right);
+    delete root;
+}
+
 int main() {
     Node* root = NULL;
     int n;
 
-    cout << "Enter number of nodes: ";
+    cout << "Enter number of values: ";
     cin >> n;
 
     cout << "Enter values: ";
-
     for (int i = 0; i < n; i++) {
         int value;
         cin >> value;
         root = insert(root, value);
     }
 
-    cout << "Inorder: ";
-    inorder(root);
-    cout << "\n";
-
-    cout << "Preorder: ";
-    preorder(root);
-    cout << "\n";
-
-    cout << "Postorder: ";
-    postorder(root);
-    cout << "\n";
-
-    cout << "Level Order: ";
-    levelOrder(root);
-    cout << "\n";
-
-    cout << "Height: " << height(root) << "\n";
-
-    Node* minimum = findMin(root);
-    Node* maximum = findMax(root);
-
-    if (minimum != NULL) {
-        cout << "Minimum: " << minimum->data << "\n";
-    }
-
-    if (maximum != NULL) {
-        cout << "Maximum: " << maximum->data << "\n";
-    }
+    cout << "\nTree traversals:\n";
+    printTraversals(root);
+    printStats(root);
 
     int key;
     cout << "Enter key to search: ";
     cin >> key;
-
-    if (search(root, key)) {
-        cout << "Key Found\n";
-    } else {
-        cout << "Key Not Found\n";
-    }
+    cout << (search(root, key) ? "Key Found\n" : "Key Not Found\n");
 
     cout << "Enter key to delete: ";
     cin >> key;
-
     root = deleteNode(root, key);
 
-    cout << "Inorder after deletion: ";
-    inorder(root);
-    cout << "\n";
+    cout << "\nAfter deletion:\n";
+    printTraversals(root);
+    printStats(root);
 
+    deleteTree(root);
     return 0;
 }

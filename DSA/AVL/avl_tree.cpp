@@ -15,16 +15,16 @@ struct Node {
     }
 };
 
-int nodeHeight(Node* node) {
+int height(Node* node) {
     return node == NULL ? 0 : node->height;
 }
 
 int balanceFactor(Node* node) {
-    return node == NULL ? 0 : nodeHeight(node->left) - nodeHeight(node->right);
+    return node == NULL ? 0 : height(node->left) - height(node->right);
 }
 
 void updateHeight(Node* node) {
-    node->height = 1 + max(nodeHeight(node->left), nodeHeight(node->right));
+    node->height = 1 + max(height(node->left), height(node->right));
 }
 
 Node* rotateRight(Node* root) {
@@ -36,7 +36,6 @@ Node* rotateRight(Node* root) {
 
     updateHeight(root);
     updateHeight(newRoot);
-
     return newRoot;
 }
 
@@ -49,7 +48,6 @@ Node* rotateLeft(Node* root) {
 
     updateHeight(root);
     updateHeight(newRoot);
-
     return newRoot;
 }
 
@@ -57,7 +55,6 @@ Node* rebalance(Node* root) {
     updateHeight(root);
     int balance = balanceFactor(root);
 
-    // Left-heavy: perform an LL or LR rotation.
     if (balance > 1) {
         if (balanceFactor(root->left) < 0) {
             root->left = rotateLeft(root->left);
@@ -65,7 +62,6 @@ Node* rebalance(Node* root) {
         return rotateRight(root);
     }
 
-    // Right-heavy: perform an RR or RL rotation.
     if (balance < -1) {
         if (balanceFactor(root->right) > 0) {
             root->right = rotateRight(root->right);
@@ -95,6 +91,14 @@ Node* insert(Node* root, int value) {
 Node* findMin(Node* root) {
     while (root != NULL && root->left != NULL) {
         root = root->left;
+    }
+
+    return root;
+}
+
+Node* findMax(Node* root) {
+    while (root != NULL && root->right != NULL) {
+        root = root->right;
     }
 
     return root;
@@ -156,6 +160,77 @@ void preorder(Node* root) {
     preorder(root->right);
 }
 
+void postorder(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+
+    postorder(root->left);
+    postorder(root->right);
+    cout << root->data << " ";
+}
+
+void levelOrder(Node* root) {
+    if (root == NULL) {
+        return;
+    }
+
+    queue<Node*> q;
+    q.push(root);
+
+    while (!q.empty()) {
+        Node* current = q.front();
+        q.pop();
+        cout << current->data << " ";
+
+        if (current->left != NULL) q.push(current->left);
+        if (current->right != NULL) q.push(current->right);
+    }
+}
+
+int countNodes(Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    return 1 + countNodes(root->left) + countNodes(root->right);
+}
+
+int countLeafNodes(Node* root) {
+    if (root == NULL) {
+        return 0;
+    }
+
+    if (root->left == NULL && root->right == NULL) {
+        return 1;
+    }
+
+    return countLeafNodes(root->left) + countLeafNodes(root->right);
+}
+
+void printTraversals(Node* root) {
+    cout << "Inorder: ";
+    inorder(root);
+    cout << "\nPreorder: ";
+    preorder(root);
+    cout << "\nPostorder: ";
+    postorder(root);
+    cout << "\nLevel Order: ";
+    levelOrder(root);
+    cout << "\n";
+}
+
+void printStats(Node* root) {
+    cout << "Height: " << height(root) << "\n";
+    cout << "Total Nodes: " << countNodes(root) << "\n";
+    cout << "Leaf Nodes: " << countLeafNodes(root) << "\n";
+
+    Node* minimum = findMin(root);
+    Node* maximum = findMax(root);
+    if (minimum != NULL) cout << "Minimum: " << minimum->data << "\n";
+    if (maximum != NULL) cout << "Maximum: " << maximum->data << "\n";
+}
+
 void deleteTree(Node* root) {
     if (root == NULL) {
         return;
@@ -180,33 +255,22 @@ int main() {
         root = insert(root, value);
     }
 
-    cout << "Inorder: ";
-    inorder(root);
-    cout << "\n";
-
-    cout << "Preorder: ";
-    preorder(root);
-    cout << "\n";
-
-    cout << "Height: " << nodeHeight(root) << "\n";
+    cout << "\nAVL tree traversals:\n";
+    printTraversals(root);
+    printStats(root);
 
     int key;
     cout << "Enter key to search: ";
     cin >> key;
-
-    if (search(root, key)) {
-        cout << "Key Found\n";
-    } else {
-        cout << "Key Not Found\n";
-    }
+    cout << (search(root, key) ? "Key Found\n" : "Key Not Found\n");
 
     cout << "Enter key to delete: ";
     cin >> key;
     root = deleteNode(root, key);
 
-    cout << "Inorder after deletion: ";
-    inorder(root);
-    cout << "\n";
+    cout << "\nAfter deletion and rebalancing:\n";
+    printTraversals(root);
+    printStats(root);
 
     deleteTree(root);
     return 0;
